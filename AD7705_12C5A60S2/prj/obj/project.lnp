@@ -1,0 +1,8 @@
+".\obj\main.obj",
+".\obj\bsp.obj",
+".\obj\bsp_uart.obj",
+".\obj\bsp_tm7705.obj",
+".\obj\bsp_printf.obj" 
+TO ".\obj\project" 
+PRINT(".\list\project.m51") RAMSIZE(256) 
+DISABLEWARNING (16) 

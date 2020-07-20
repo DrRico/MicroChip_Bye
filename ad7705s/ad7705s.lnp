@@ -1,0 +1,4 @@
+"STARTUP.obj",
+"ad7705-1602.obj" 
+TO "ad7705s" 
+RAMSIZE(256) 

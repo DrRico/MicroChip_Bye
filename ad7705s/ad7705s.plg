@@ -1,0 +1,21 @@
+<html>
+<body>
+<pre>
+<h1>µVision3 Build Log</h1>
+<h2>Project:</h2>
+H:\ad7705s\ad7705s.uv2
+Project File Date:  04/29/2011
+
+<h2>Output:</h2>
+Build target 'Target 1'
+assembling STARTUP.A51...
+compiling ad7705-1602.c...
+AD7705-1602.C(210): warning C280: 'n': unreferenced local variable
+linking...
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?LCD_CLEAR?AD7705_1602
+*** WARNING L16: UNCALLED SEGMENT, IGNORED FOR OVERLAY PROCESS
+    SEGMENT: ?PR?_LCD_WRITE_STR?AD7705_1602
+Program Size: data=28.0 xdata=0 code=889
+creating hex file from "ad7705s"...
+"ad7705s" - 0 Error(s), 3 Warning(s).

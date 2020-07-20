@@ -1,0 +1,303 @@
+C51 COMPILER V9.57.0.0   MAIN                                                              07/19/2020 20:12:43 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\obj\main.obj
+COMPILER INVOKED BY: D:\KeilC51\C51\BIN\C51.EXE ..\src\main.c LARGE OPTIMIZE(8,SPEED) BROWSE INCDIR(..\src\bsp) DEBUG OB
+                    -JECTEXTEND PRINT(.\list\main.lst) OBJECT(.\obj\main.obj)
+
+line level    source
+
+   1          /*
+   2          *********************************************************************************************************
+   3          *
+   4          *       模块名称 : 主程序
+   5          *       文件名称 : main.c
+   6          *       版    本 : V1.0
+   7          *       说    明 : TM7705读写例程
+   8          *       修改记录 :
+   9          *               版本号  日期       作者    说明
+  10          *               V1.0    2014-04-20 发布1.0版本
+  11          *
+  12          *       Copyright (C), 2013-2014, 安富莱电子 www.armfly.com
+  13          *
+  14          *********************************************************************************************************
+  15          */
+  16          
+  17          #include "bsp.h"
+  18          #include <intrins.h>
+  19          /* 定义例程名和例程发布日期 */
+  20          sbit TestingLED = P3^5; 
+  21          sbit Bee = P3^6; 
+  22          sbit DoneLED = P3^7; 
+  23          #define TestingLED_ON()         TestingLED = 0
+  24          #define TestingLED_OFF()        TestingLED = 1
+  25          #define Bee_ON()                        Bee = 1
+  26          #define Bee_OFF()                       Bee = 0
+  27          #define DoneLED_ON()            DoneLED = 0
+  28          #define DoneLED_OFF()           DoneLED = 1
+  29          
+  30          static void PrintfLogo(void);
+  31          static void PrintfHardInfo(void);
+  32          static void TM7705_Demo(void);
+  33          uint16_t CRC16(uint8_t *puchMsg, uint16_t usDataLen);
+  34          void dataPrintf(uint16_t *p);
+  35          code uint8_t auchCRCHi[] = {
+  36          0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+  37          0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+  38          0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
+  39          0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41,
+  40          0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81,
+  41          0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0,
+  42          0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
+  43          0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40,
+  44          0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+  45          0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+  46          0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01,
+  47          0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
+  48          0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+  49          0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0,
+  50          0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01,
+  51          0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81, 0x40, 0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41,
+  52          0x00, 0xC1, 0x81, 0x40, 0x01, 0xC0, 0x80, 0x41, 0x01, 0xC0, 0x80, 0x41, 0x00, 0xC1, 0x81,
+  53          0x40
+  54          };
+C51 COMPILER V9.57.0.0   MAIN                                                              07/19/2020 20:12:43 PAGE 2   
+
+  55           
+  56          code uint8_t auchCRCLo[] = {
+  57          0x00, 0xC0, 0xC1, 0x01, 0xC3, 0x03, 0x02, 0xC2, 0xC6, 0x06, 0x07, 0xC7, 0x05, 0xC5, 0xC4,
+  58          0x04, 0xCC, 0x0C, 0x0D, 0xCD, 0x0F, 0xCF, 0xCE, 0x0E, 0x0A, 0xCA, 0xCB, 0x0B, 0xC9, 0x09,
+  59          0x08, 0xC8, 0xD8, 0x18, 0x19, 0xD9, 0x1B, 0xDB, 0xDA, 0x1A, 0x1E, 0xDE, 0xDF, 0x1F, 0xDD,
+  60          0x1D, 0x1C, 0xDC, 0x14, 0xD4, 0xD5, 0x15, 0xD7, 0x17, 0x16, 0xD6, 0xD2, 0x12, 0x13, 0xD3,
+  61          0x11, 0xD1, 0xD0, 0x10, 0xF0, 0x30, 0x31, 0xF1, 0x33, 0xF3, 0xF2, 0x32, 0x36, 0xF6, 0xF7,
+  62          0x37, 0xF5, 0x35, 0x34, 0xF4, 0x3C, 0xFC, 0xFD, 0x3D, 0xFF, 0x3F, 0x3E, 0xFE, 0xFA, 0x3A,
+  63          0x3B, 0xFB, 0x39, 0xF9, 0xF8, 0x38, 0x28, 0xE8, 0xE9, 0x29, 0xEB, 0x2B, 0x2A, 0xEA, 0xEE,
+  64          0x2E, 0x2F, 0xEF, 0x2D, 0xED, 0xEC, 0x2C, 0xE4, 0x24, 0x25, 0xE5, 0x27, 0xE7, 0xE6, 0x26,
+  65          0x22, 0xE2, 0xE3, 0x23, 0xE1, 0x21, 0x20, 0xE0, 0xA0, 0x60, 0x61, 0xA1, 0x63, 0xA3, 0xA2,
+  66          0x62, 0x66, 0xA6, 0xA7, 0x67, 0xA5, 0x65, 0x64, 0xA4, 0x6C, 0xAC, 0xAD, 0x6D, 0xAF, 0x6F,
+  67          0x6E, 0xAE, 0xAA, 0x6A, 0x6B, 0xAB, 0x69, 0xA9, 0xA8, 0x68, 0x78, 0xB8, 0xB9, 0x79, 0xBB,
+  68          0x7B, 0x7A, 0xBA, 0xBE, 0x7E, 0x7F, 0xBF, 0x7D, 0xBD, 0xBC, 0x7C, 0xB4, 0x74, 0x75, 0xB5,
+  69          0x77, 0xB7, 0xB6, 0x76, 0x72, 0xB2, 0xB3, 0x73, 0xB1, 0x71, 0x70, 0xB0, 0x50, 0x90, 0x91,
+  70          0x51, 0x93, 0x53, 0x52, 0x92, 0x96, 0x56, 0x57, 0x97, 0x55, 0x95, 0x94, 0x54, 0x9C, 0x5C,
+  71          0x5D, 0x9D, 0x5F, 0x9F, 0x9E, 0x5E, 0x5A, 0x9A, 0x9B, 0x5B, 0x99, 0x59, 0x58, 0x98, 0x88,
+  72          0x48, 0x49, 0x89, 0x4B, 0x8B, 0x8A, 0x4A, 0x4E, 0x8E, 0x8F, 0x4F, 0x8D, 0x4D, 0x4C, 0x8C,
+  73          0x44, 0x84, 0x85, 0x45, 0x87, 0x47, 0x46, 0x86, 0x82, 0x42, 0x43, 0x83, 0x41, 0x81, 0x80,
+  74          0x40
+  75          };
+  76          code char sum_P0[16][13] = {{0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef},
+  77                                                                  {0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0},
+  78                                                                  {0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01},
+  79                                                                  {0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12},
+  80                                                                  {0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23},
+  81                                                                  {0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34},
+  82                                                                  {0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45},
+  83                                                                  {0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56},
+  84                                                                  {0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67},
+  85                                                                  {0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78},
+  86                                                                  {0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89},
+  87                                                                  {0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a},
+  88                                                                  {0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab},
+  89                                                                  {0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc},
+  90                                                                  {0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd},
+  91                                                                  {0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde}};
+  92          
+  93          code char sum_P2[16] = {0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0};
+  94          unsigned char nbIoTData[217] = {1,70,0,0,0,104,208};
+  95          unsigned int i,j,k;
+  96          
+  97          void UsartInit()        
+  98          { 
+  99   1              SCON=0X50;
+ 100   1              TMOD=0x20;
+ 101   1              TH1=0XFD;        //9600
+ 102   1              TL1=0xFD;
+ 103   1              TR1=1;
+ 104   1              ES=0;
+ 105   1              EA=1;
+ 106   1      }
+ 107          void main(void)
+ 108          {
+ 109   1              UsartInit();
+ 110   1              // bsp_Init();                  /* 初始化底层硬件,该函数在 bsp.c文件 */
+ 111   1              TM7705_Demo();
+ 112   1      }
+ 113          
+ 114          /*
+ 115          *********************************************************************************************************
+ 116          *       函 数 名: TM7705_Demo
+C51 COMPILER V9.57.0.0   MAIN                                                              07/19/2020 20:12:43 PAGE 3   
+
+ 117          *       功能说明: 定时读取TM7705的ADC值，并打印到串口。请通过PC机串口工具查看结果。
+ 118          *       形    参：无
+ 119          *       返 回 值: 无
+ 120          *********************************************************************************************************
+ 121          */
+ 122          static void TM7705_Demo(void)
+ 123          {
+ 124   1              uint16_t adc1, adc2;
+ 125   1              uint16_t crcData;
+ 126   1              uint16_t ForwardLists[104];
+ 127   1              uint16_t BackwardLists[104];
+ 128   1              bsp_InitTM7705();                       /* 初始化配置TM7705 */
+ 129   1              TM7705_CalibSelf(1);            /* 自校准。执行时间较长，约180ms */             
+ 130   1              adc1 = TM7705_ReadAdc(1);                               
+ 131   1              TM7705_CalibSelf(2);            /* 自校准。执行时间较长，约180ms */
+ 132   1              adc2 = TM7705_ReadAdc(2);       
+ 133   1              for(k=0;k<5;k++){
+ 134   2                      Bee_ON();
+ 135   2                      DoneLED_ON();
+ 136   2                      TestingLED_ON();
+ 137   2                      adc1 = TM7705_ReadAdc(1);       /* 执行时间 80ms */     
+ 138   2                      adc2 = TM7705_ReadAdc(2);       
+ 139   2                      bsp_DelayMS(2500);
+ 140   2                      Bee_OFF();
+ 141   2                      DoneLED_OFF();
+ 142   2                      TestingLED_OFF();
+ 143   2                      bsp_DelayMS(2500);
+ 144   2              }
+ 145   1              Bee_OFF();
+ 146   1              DoneLED_OFF();
+ 147   1              TestingLED_ON();
+ 148   1              k=0;
+ 149   1              for(j=0;j<16;j++){
+ 150   2                      for(i=0;i<13;i++){
+ 151   3                              // printf("k:%d  ",k);  
+ 152   3                              P0 = sum_P0[j][i];      //this will duo to the huge mistake of the volt_data in AD modual,and now has nothin
+             -g to do with it.
+ 153   3                              P2 = sum_P2[j];
+ 154   3                              // printf("j:%d----i:%d----P2:%x==",j,i,sum_P2[j]);
+ 155   3                              // printf("==P0:%x====",sum_P0[j][i]);
+ 156   3                              bsp_DelayMS(600);
+ 157   3                              #if 1   
+ 158   3                                      /* 双通道切换采样，执行一轮实际那约 160ms */                    
+ 159   3                                      adc1 = TM7705_ReadAdc(1);       /* 执行时间 80ms */     
+ 160   3                                      adc2 = TM7705_ReadAdc(2);   /* 执行时间 80ms */ 
+ 161   3                              #else
+                                              /* 如果只采集1个通道，则刷新速率 50Hz （缺省设置的，最大可以设置为500Hz） */
+                                              adc1 = TM7705_ReadAdc(1);       /* 执行时间 20ms (50Hz速率刷新时） */           
+                                              adc2 = 0;
+                                      #endif
+ 166   3                              /* 打印采集数据 */
+ 167   3                              {
+ 168   4                                      /**
+ 169   4                                      int volt1, volt2;
+ 170   4                                      volt1 = ((int32_t)adc1 * 5000) / 65535;
+ 171   4                                      volt2 = ((int32_t)adc2 * 5000) / 65535;  
+ 172   4                                      printf("CH1=%5ld (%5dmV) \r\n", (long int)adc1, volt1);
+ 173   4                                      **/
+ 174   4                                      if(k < 104){
+ 175   5                                              ForwardLists[k] = adc1;
+ 176   5                                      }
+ 177   4                                      else{
+C51 COMPILER V9.57.0.0   MAIN                                                              07/19/2020 20:12:43 PAGE 4   
+
+ 178   5                                              BackwardLists[k-104] = adc1;
+ 179   5                                      }
+ 180   4                                      bsp_DelayMS(100);
+ 181   4                                      k++;
+ 182   4                              }
+ 183   3                      }
+ 184   2              }
+ 185   1      //      dataPrintf(ForwardLists);
+ 186   1      //      dataPrintf(BackwardLists);
+ 187   1              Bee_ON();
+ 188   1              DoneLED_ON();
+ 189   1              TestingLED_ON();
+ 190   1              for(k=0;k < 104;k++){
+ 191   2                      nbIoTData[2*(k+4)-1] = ForwardLists[k]/256;
+ 192   2                      nbIoTData[2*(k+4)] = ForwardLists[k]%256;
+ 193   2              }
+ 194   1              crcData = CRC16(nbIoTData, 215);
+ 195   1              nbIoTData[216] = crcData >> 8;
+ 196   1              nbIoTData[215] = crcData & 0xff;
+ 197   1              for(k=0;k<217;k++)
+ 198   1              {
+ 199   2                      SBUF=nbIoTData[k];
+ 200   2                      while(!TI);
+ 201   2                      TI=0;
+ 202   2              }
+ 203   1              bsp_DelayMS(30000);
+ 204   1              Bee_OFF();
+ 205   1              DoneLED_OFF();
+ 206   1              TestingLED_ON();
+ 207   1              bsp_DelayMS(15000);
+ 208   1              Bee = 1;
+ 209   1              nbIoTData[3] = 104;
+ 210   1              for(k=0;k < 104;k++){
+ 211   2                      nbIoTData[2*(k+4)-1] = BackwardLists[k]/256;
+ 212   2                      nbIoTData[2*(k+4)] = BackwardLists[k]%256;
+ 213   2              }
+ 214   1              crcData = CRC16(nbIoTData, 215);
+ 215   1              nbIoTData[216] = crcData >> 8;
+ 216   1              nbIoTData[215] = crcData & 0xff;
+ 217   1              for(k=0;k<217;k++)
+ 218   1              {
+ 219   2                      SBUF=nbIoTData[k];
+ 220   2                      while(!TI);
+ 221   2                      TI=0;
+ 222   2              }
+ 223   1              Bee_ON();
+ 224   1              DoneLED_ON();
+ 225   1              TestingLED_OFF();
+ 226   1              bsp_DelayMS(60000);
+ 227   1              Bee_OFF();
+ 228   1              while(1);
+ 229   1      }
+ 230          
+ 231          
+ 232          /*********************************************************************************************************
+             -*
+ 233          /**
+ 234          * @brief  Calculate CRC16
+ 235          * @param  q: Pointer to data
+ 236          * @param  len: data length
+ 237          * @retval CRC16 value
+ 238          **********************************************************************************************************
+C51 COMPILER V9.57.0.0   MAIN                                                              07/19/2020 20:12:43 PAGE 5   
+
+             -/
+ 239          uint16_t CRC16(uint8_t *puchMsg, uint16_t usDataLen)
+ 240          {
+ 241   1              uint16_t uchCRCHi = 0xFF; // 
+ 242   1              uint16_t uchCRCLo = 0xFF; // 
+ 243   1              uint32_t uIndex; // 
+ 244   1              while (usDataLen--) //
+ 245   1              {
+ 246   2                      uIndex = uchCRCHi ^ *puchMsg++; //
+ 247   2                      uchCRCHi = uchCRCLo ^ auchCRCHi[uIndex];
+ 248   2                      uchCRCLo = auchCRCLo[uIndex];
+ 249   2              }
+ 250   1              return (((uint16_t)uchCRCLo << 8u) | uchCRCHi);
+ 251   1      }
+ 252          
+ 253          
+ 254          /*********************************************************************************************************
+             -*
+ 255          /**
+ 256          * @brief  Calculate CRC16
+ 257          * @param  q: Pointer to data
+ 258          * @param  len: data length
+ 259          * @retval CRC16 value
+ 260          **********************************************************************************************************
+             -/
+ 261          void dataPrintf(uint16_t *p){
+ 262   1              uint8_t i;
+ 263   1              for(i=0;i<104;i++){
+ 264   2                      printf(" %d ",p[i]);
+ 265   2              }
+ 266   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =   1088    ----
+   CONSTANT SIZE    =    741    ----
+   XDATA SIZE       =    223     439
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

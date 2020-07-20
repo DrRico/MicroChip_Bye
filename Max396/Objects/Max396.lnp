@@ -1,0 +1,4 @@
+".\Objects\STARTUP.obj",
+".\Objects\main.obj" 
+TO ".\Objects\Max396" 
+PRINT(".\Listings\Max396.m51") RAMSIZE(256) 

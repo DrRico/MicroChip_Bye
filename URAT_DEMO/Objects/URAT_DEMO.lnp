@@ -1,0 +1,4 @@
+".\Objects\STARTUP.obj",
+".\Objects\main.obj" 
+TO ".\Objects\URAT_DEMO" 
+PRINT(".\Listings\URAT_DEMO.m51") RAMSIZE(256) 

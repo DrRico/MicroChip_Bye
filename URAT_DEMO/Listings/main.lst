@@ -1,0 +1,119 @@
+C51 COMPILER V9.57.0.0   MAIN                                                              07/06/2020 20:59:49 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\Objects\main.obj
+COMPILER INVOKED BY: D:\Keil_v5\C51\BIN\C51.EXE main.c OPTIMIZE(8,SPEED) BROWSE DEBUG OBJECTEXTEND PRINT(.\Listings\main
+                    -.lst) OBJECT(.\Objects\main.obj)
+
+line level    source
+
+   1          #include <stdio.h>
+   2          #include <reg52.h>
+   3          #include <stdlib.h>
+   4          #define MAX 17000          
+   5          #define MIN 14000           
+   6          
+   7          
+   8          code char sum_P0[16][13] = {{0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef},
+   9                                                                  {0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0},
+  10                                                                  {0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01},
+  11                                                                  {0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12},
+  12                                                                  {0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23},
+  13                                                                  {0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34},
+  14                                                                  {0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45},
+  15                                                                  {0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56},
+  16                                                                  {0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67},
+  17                                                                  {0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78},
+  18                                                                  {0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89},
+  19                                                                  {0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a},
+  20                                                                  {0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab},
+  21                                                                  {0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc},
+  22                                                                  {0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd},
+  23                                                                  {0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde}};
+  24          
+  25          code char sum_P2[16] = {0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0};
+  26          
+  27          int i,j;
+  28          unsigned int adc1;
+  29          int volt1;
+  30          
+  31          void InitUART(void)
+  32          {
+  33   1          TH1 = 0xFD;  
+  34   1          TL1 = TH1;
+  35   1          TMOD |= 0x20;        
+  36   1          SCON = 0x50;        
+  37   1          ES = 1;                     
+  38   1          TR1 = 1;            
+  39   1          TI = 1;                     
+  40   1      }
+  41          
+  42          void delay_ms(unsigned int t)
+  43          {
+  44   1          unsigned char a,b;
+  45   1          while(t--)
+  46   1          {
+  47   2            for(b=102;b>0;b--)
+  48   2            for(a=3;a>0;a--);
+  49   2          }
+  50   1      }
+  51          unsigned int random(void)
+  52          {
+  53   1        unsigned int value,iii;
+  54   1        for(iii=0;iii<100;iii++)
+C51 COMPILER V9.57.0.0   MAIN                                                              07/06/2020 20:59:49 PAGE 2   
+
+  55   1        {
+  56   2          value = rand() % (MAX + 1- MIN) + MIN;             
+  57   2        }
+  58   1        return value;
+  59   1      }
+  60          
+  61          
+  62          void main()
+  63          {
+  64   1          InitUART();
+  65   1          EA = 1;             
+  66   1          while(1)
+  67   1          {
+  68   2              //delay_ms(500);
+  69   2              //printf("Hello World!\n");
+  70   2                      for(j=0;j<16;j++){
+  71   3                              for(i=0;i<13;i++){
+  72   4                                      adc1 = random();
+  73   4                                      P0 = sum_P0[j][i];
+  74   4                                      P2 = sum_P2[j];
+  75   4                                      printf("j:%d----i:%d----P2:%x==",j,i,sum_P2[j]);
+  76   4                                      printf("==P0:%x====",sum_P0[j][i]);
+  77   4                                      delay_ms(150);
+  78   4                                      /* 计算实际电压值（近似估算的），如需准确，请进行校准 */
+  79   4                                      volt1 = ((unsigned long)adc1 * 5000) / 65535;
+  80   4                                      
+  81   4                                      /* 打印ADC采样结果 */   
+  82   4                                      // printf("CH1=%5ld (%5dmV) \r CH2=%5ld (%5dmV)\r\n", (long int)adc1, volt1, (long int)adc2, volt2);
+  83   4                                      
+  84   4                                      printf("CH1=%5ld (%5dmV) \r\n", (long int)adc1, volt1);
+  85   4      
+  86   4                                      delay_ms(250);
+  87   4                                      
+  88   4                              }
+  89   3                      }
+  90   2              while(1);
+  91   2              }
+  92   1        
+  93   1      }
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    347    ----
+   CONSTANT SIZE    =    280    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =   ----    ----
+   DATA SIZE        =      8       4
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)

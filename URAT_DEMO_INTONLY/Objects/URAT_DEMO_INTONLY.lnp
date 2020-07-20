@@ -1,0 +1,4 @@
+".\Objects\STARTUP.obj",
+".\Objects\main.obj" 
+TO ".\Objects\URAT_DEMO_INTONLY" 
+PRINT(".\Listings\URAT_DEMO_INTONLY.m51") RAMSIZE(256) 

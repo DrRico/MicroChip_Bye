@@ -1,0 +1,194 @@
+C51 COMPILER V9.57.0.0   MAIN                                                              07/17/2020 15:34:54 PAGE 1   
+
+
+C51 COMPILER V9.57.0.0, COMPILATION OF MODULE MAIN
+OBJECT MODULE PLACED IN .\obj\main.obj
+COMPILER INVOKED BY: D:\KeilC51\C51\BIN\C51.EXE ..\src\main.c COMPACT OPTIMIZE(8,SPEED) BROWSE INCDIR(..\src\bsp) DEBUG 
+                    -OBJECTEXTEND PRINT(.\list\main.lst) OBJECT(.\obj\main.obj)
+
+line level    source
+
+   1          /*
+   2          *********************************************************************************************************
+   3          *
+   4          *       模块名称 : 主程序
+   5          *       文件名称 : main.c
+   6          *       版    本 : V1.0
+   7          *       说    明 : TM7705读写例程
+   8          *       修改记录 :
+   9          *               版本号  日期       作者    说明
+  10          *               V1.0    2014-04-20 发布1.0版本
+  11          *
+  12          *       Copyright (C), 2013-2014, 安富莱电子 www.armfly.com
+  13          *
+  14          *********************************************************************************************************
+  15          */
+  16          
+  17          #include "bsp.h"
+  18          
+  19          /* 定义例程名和例程发布日期 */
+  20          #define EXAMPLE_NAME    "STC89C52_TM7705双路ADC模块例程"
+  21          #define EXAMPLE_DATE    "2014-04-20"
+  22          #define DEMO_VER                "1.0"
+  23          
+  24          static void PrintfLogo(void);
+  25          static void PrintfHardInfo(void);
+  26          static void TM7705_Demo(void);
+  27          
+  28          code char sum_P0[16][13] = {{0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef},
+  29                                                                  {0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0},
+  30                                                                  {0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01},
+  31                                                                  {0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12},
+  32                                                                  {0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23},
+  33                                                                  {0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34},
+  34                                                                  {0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45},
+  35                                                                  {0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56},
+  36                                                                  {0xab,0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67},
+  37                                                                  {0xbc,0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78},
+  38                                                                  {0xcd,0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89},
+  39                                                                  {0xde,0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a},
+  40                                                                  {0xef,0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab},
+  41                                                                  {0xf0,0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc},
+  42                                                                  {0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd},
+  43                                                                  {0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde}};
+  44          
+  45          code char sum_P2[16] = {0x01,0x12,0x23,0x34,0x45,0x56,0x67,0x78,0x89,0x9a,0xab,0xbc,0xcd,0xde,0xef,0xf0};
+  46          
+  47          int i,j;
+  48          
+  49          void main(void)
+  50          {
+  51   1              bsp_Init();                     /* 初始化底层硬件,该函数在 bsp.c文件 */
+  52   1              PrintfLogo();           /* 打印例程logo */
+  53   1              // PrintfHardInfo();    /* 打印硬件接线信息 */
+  54   1              TM7705_Demo();
+C51 COMPILER V9.57.0.0   MAIN                                                              07/17/2020 15:34:54 PAGE 2   
+
+  55   1      }
+  56          
+  57          /*
+  58          *********************************************************************************************************
+  59          *       函 数 名: TM7705_Demo
+  60          *       功能说明: 定时读取TM7705的ADC值，并打印到串口。请通过PC机串口工具查看结果。
+  61          *       形    参：无
+  62          *       返 回 值: 无
+  63          *********************************************************************************************************
+  64          */
+  65          static void TM7705_Demo(void)
+  66          {
+  67   1              uint16_t adc1, adc2;
+  68   1              
+  69   1              bsp_InitTM7705();                       /* 初始化配置TM7705 */
+  70   1      
+  71   1              TM7705_CalibSelf(1);            /* 自校准。执行时间较长，约180ms */             
+  72   1              adc1 = TM7705_ReadAdc(1);                               
+  73   1              
+  74   1              TM7705_CalibSelf(2);            /* 自校准。执行时间较长，约180ms */
+  75   1              adc2 = TM7705_ReadAdc(2);       
+  76   1              
+  77   1                      
+  78   1              for(j=0;j<16;j++){
+  79   2                      for(i=0;i<13;i++){
+  80   3                              bsp_Idle();             
+  81   3                              P0 = sum_P0[j][i];
+  82   3                              P2 = sum_P2[j];
+  83   3                              printf("j:%d----i:%d----P2:%x==",j,i,sum_P2[j]);
+  84   3                              printf("==P0:%x====",sum_P0[j][i]);
+  85   3                              bsp_DelayMS(150);
+  86   3      
+  87   3                              #if 1   
+  88   3                                      /* 双通道切换采样，执行一轮实际那约 160ms */                    
+  89   3                                      adc1 = TM7705_ReadAdc(1);       /* 执行时间 80ms */     
+  90   3                                      adc2 = TM7705_ReadAdc(2);                       
+  91   3                                      //adc2 = TM7705_ReadAdc(2);     /* 执行时间 80ms */
+  92   3                              #else
+                                              /* 如果只采集1个通道，则刷新速率 50Hz （缺省设置的，最大可以设置为500Hz） */
+                                              adc1 = TM7705_ReadAdc(1);       /* 执行时间 20ms (50Hz速率刷新时） */           
+                                              adc2 = 0;
+                                      #endif
+  97   3                                      
+  98   3                              /* 打印采集数据 */
+  99   3                              {
+ 100   4                                      int volt1, volt2;
+ 101   4                                      
+ 102   4                                      /* 计算实际电压值（近似估算的），如需准确，请进行校准 */
+ 103   4                                      volt1 = ((int32_t)adc1 * 5000) / 65535;
+ 104   4                                      volt2 = ((int32_t)adc2 * 5000) / 65535;
+ 105   4                                      
+ 106   4                                      /* 打印ADC采样结果 */   
+ 107   4                                      // printf("CH1=%5ld (%5dmV) \r CH2=%5ld (%5dmV)\r\n", (long int)adc1, volt1, (long int)adc2, volt2);
+ 108   4                                      
+ 109   4                                      printf("CH1=%5ld (%5dmV) \r\n", (long int)adc1, volt1);
+ 110   4      
+ 111   4                                      bsp_DelayMS(250);
+ 112   4                              }
+ 113   3                      }
+ 114   2              }
+ 115   1              while(1);
+ 116   1      }
+C51 COMPILER V9.57.0.0   MAIN                                                              07/17/2020 15:34:54 PAGE 3   
+
+ 117          
+ 118          /*
+ 119          *********************************************************************************************************
+ 120          *       函 数 名: PrintfLogo
+ 121          *       功能说明: 打印例程名称和例程发布日期, 接上串口线后，打开PC机的超级终端软件可以观察结果
+ 122          *       形    参：无
+ 123          *       返 回 值: 无
+ 124          *********************************************************************************************************
+ 125          */
+ 126          static void PrintfLogo(void)
+ 127          {
+ 128   1              /* 友情提示：
+ 129   1                      使用STVD开发时，printf/sprintf 入口参数 %d 必须是 int 类型(16位)，否则打印结果不正确。
+ 130   1                      IAR无此问题。
+ 131   1              */
+ 132   1      
+ 133   1              printf("*************************************************************\n\r");
+ 134   1              printf("* 例程名称   : %s\r\n", EXAMPLE_NAME);  // 打印例程名称 //
+ 135   1              printf("* 例程版本   : %s\r\n", DEMO_VER);              // 打印例程版本 //
+ 136   1              printf("* 发布日期   : %s\r\n", EXAMPLE_DATE);  // 打印例程日期 //
+ 137   1              printf("* QQ    : 1295744630 \r\n");
+ 138   1              printf("* Email : armfly@qq.com \r\n");
+ 139   1              printf("* Copyright www.armfly.com 安富莱电子\r\n");
+ 140   1              printf("*************************************************************\n\r");
+ 141   1      }
+ 142          
+ 143          /*
+ 144          *********************************************************************************************************
+ 145          *       函 数 名: PrintfHardInfo
+ 146          *       功能说明: 打印硬件接线信息
+ 147          *       形    参：无
+ 148          *       返 回 值: 无
+ 149          *********************************************************************************************************
+ 150          */
+ 151          static void PrintfHardInfo(void)
+ 152          {
+ 153   1              /*printf("接线方法: \r\n");
+ 154   1              printf("AD7705模块    51开发板(STC89C52, 11.0592M晶振)\r\n");
+ 155   1          printf("  VCC   <------  5.0V      5V供电\r\n");
+ 156   1          printf("  GND   -------  GND       地\r\n");          
+ 157   1              printf("  CS    <------  P1.0      SPI片选\r\n");
+ 158   1              printf("  RST   <------  P1.1      SPI复位\r\n");
+ 159   1              printf("  DIN   <------  P1.2      SPI MOSI\r\n");
+ 160   1              printf("  SCK   <------  P1.3      SPI时钟\r\n");
+ 161   1              printf("  DOUT  -------> P1.4      SPI MISO\r\n");
+ 162   1              printf("  DRDY  <------> P1.5      满信号，数据准备好\r\n");*/
+ 163   1      }
+ 164          
+ 165          /***************************** 安富莱电子 www.armfly.com (END OF FILE) *********************************/
+ 166          
+
+
+MODULE INFORMATION:   STATIC OVERLAYABLE
+   CODE SIZE        =    527    ----
+   CONSTANT SIZE    =    538    ----
+   XDATA SIZE       =   ----    ----
+   PDATA SIZE       =      4       8
+   DATA SIZE        =   ----    ----
+   IDATA SIZE       =   ----    ----
+   BIT SIZE         =   ----    ----
+END OF MODULE INFORMATION.
+
+
+C51 COMPILATION COMPLETE.  0 WARNING(S),  0 ERROR(S)
